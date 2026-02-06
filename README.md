@@ -1,5 +1,14 @@
 ﻿# 🐾 PetWorld - AI Chat sklepu internetowego
 
+![C#](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=c-sharp&logoColor=white)
+![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=for-the-badge&logo=.net&logoColor=white)
+![Blazor](https://img.shields.io/badge/Blazor-512BD4?style=for-the-badge&logo=blazor&logoColor=white)
+![Entity Framework](https://img.shields.io/badge/Entity_Framework_Core-512BD4?style=for-the-badge&logo=.net&logoColor=white)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white)
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white)
+
 ## 📖 Opis projektu
 
 **PetWorld** to aplikacja webowa sklepu internetowego oferującego produkty dla zwierząt domowych. Klienci mogą zadawać
@@ -35,13 +44,6 @@ nad zwierzętami
 - 📦 Skrypt mysql-init/init.sql tworzy tabele i wstawia produkty
 - 🌐 Aplikacja Blazor Server startuje na porcie 5000
 - ✅ Aplikacja czeka na gotowość bazy danych (healthcheck)
-
-## 🏗️ Architektura
-
-- **Domain** - Encje (Product, ChatConversation)
-- **Application** - Interfejsy, Serwisy, DTOs
-- **Infrastructure** - Repozytoria MySQL, Agenci AI
-- **Web** - Blazor Server UI
 
 ## 🔄 Writer-Critic
 
@@ -137,4 +139,8 @@ PetWorld/
 ```
 
 ## 📸 Prezentacja interfejsu
+
+<img width="1917" height="940" alt="Image" src="https://github.com/user-attachments/assets/bdf26175-94f7-4ed0-9c69-635fd123c33e" />
+
+<img width="1917" height="940" alt="Image" src="https://github.com/user-attachments/assets/77cfcc07-7bdb-4698-a24c-f58fb419c115" />
 
