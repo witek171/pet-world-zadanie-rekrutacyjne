@@ -124,5 +124,5 @@ PetWorld/
             └── 📁 css/
                 └── 📄 site.css            # Style CSS
 ```
-
+## 📸 Prezentacja interfejsu
 
