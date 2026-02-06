@@ -4,5 +4,5 @@ namespace PetWorld.Application.Interfaces;
 
 public interface IAgentService
 {
-    Task<AgentResponse> ProcessQuestionAsync(string question);
+	Task<AgentResponse> ProcessQuestionAsync(string question);
 }

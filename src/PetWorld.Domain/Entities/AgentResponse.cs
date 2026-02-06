@@ -2,7 +2,14 @@
 
 public class AgentResponse
 {
-    public string Response { get; set; } = string.Empty;
-    public int IterationCount { get; set; }
-    public bool IsApproved { get; set; }
+	public AgentResponse(string response, int iterationCount, bool isApproved)
+	{
+		Response = response;
+		IterationCount = iterationCount;
+		IsApproved = isApproved;
+	}
+
+	public string Response { get; }
+	public int IterationCount { get; }
+	public bool IsApproved { get; }
 }
