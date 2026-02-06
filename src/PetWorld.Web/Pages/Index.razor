@@ -1,0 +1,119 @@
+﻿@page "/"
+@using PetWorld.Application.DTOs
+@using PetWorld.Application.Services
+@inject ChatService ChatService
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Chat z asystentem PetWorld</h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Zapytaj o produkty dla swojego pupila!</p>
+
+                <div class="mb-3">
+                    <label class="form-label">Twoje pytanie:</label>
+                    <textarea class="form-control" rows="3" @bind="question"
+                              placeholder="Np. Szukam karmy dla doroslego kota..."
+                              disabled="@isLoading"></textarea>
+                </div>
+
+                <button class="btn btn-primary" @onclick="SendQuestion" disabled="@(isLoading || string.IsNullOrWhiteSpace(question))">
+                    @if (isLoading)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                        <span>Przetwarzanie...</span>
+                    }
+                    else
+                    {
+                        <span>Wyslij</span>
+                    }
+                </button>
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger mt-3">@errorMessage</div>
+                }
+
+                @if (response != null)
+                {
+                    <div class="mt-4">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title">Odpowiedz:</h5>
+                                <p class="card-text" style="white-space: pre-wrap;">@response.Answer</p>
+                                <hr />
+                                <small class="text-muted">
+                                    <strong>Liczba iteracji Writer-Critic:</strong> @response.IterationCount
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">Przykladowe pytania</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    @foreach (var example in exampleQuestions)
+                    {
+                        <li class="mb-2">
+                            <a href="#" @onclick="() => SetQuestion(example)" @onclick:preventDefault>@example</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string question = "";
+    private ChatResponse? response;
+    private bool isLoading = false;
+    private string errorMessage = "";
+
+    private readonly string[] exampleQuestions = new[]
+    {
+        "Szukam karmy dla doroslego psa sredniej rasy",
+        "Co polecacie dla kota, ktory lubi drapac meble?",
+        "Mam nowe akwarium, czego potrzebuje na start?",
+        "Szukam zabawki dla energicznego psa",
+        "Co kupic dla chomika?"
+    };
+
+    private async Task SendQuestion()
+    {
+        if (string.IsNullOrWhiteSpace(question)) return;
+
+        isLoading = true;
+        errorMessage = "";
+        response = null;
+
+        try
+        {
+            var request = new ChatRequest(question);
+            response = await ChatService.ProcessChatAsync(request);
+            question = "";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Wystapil blad: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void SetQuestion(string q)
+    {
+        question = q;
+    }
+}
+

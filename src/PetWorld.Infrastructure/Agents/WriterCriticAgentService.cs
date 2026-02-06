@@ -1,0 +1,156 @@
+﻿using System.Text.Json;
+using Microsoft.Extensions.Configuration;
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.ChatCompletion;
+using PetWorld.Application.Interfaces;
+using PetWorld.Domain.Entities;
+
+namespace PetWorld.Infrastructure.Agents;
+
+public class WriterCriticAgentService : IAgentService
+{
+    private readonly IProductService _productService;
+    private readonly IConfiguration _configuration;
+    private const int MaxIterations = 3;
+
+    public WriterCriticAgentService(IProductService productService, IConfiguration configuration)
+    {
+        _productService = productService;
+        _configuration = configuration;
+    }
+
+    public async Task<AgentResponse> ProcessQuestionAsync(string question)
+    {
+        var apiKey = _configuration["OpenAI:ApiKey"] 
+            ?? throw new InvalidOperationException("OpenAI API key not configured in appsettings.json");
+
+        var modelId = _configuration["OpenAI:ModelId"] ?? "gpt-4o-mini";
+
+        var builder = Kernel.CreateBuilder();
+        builder.AddOpenAIChatCompletion(modelId, apiKey);
+        var kernel = builder.Build();
+
+        var chatService = kernel.GetRequiredService<IChatCompletionService>();
+        var productCatalog = await _productService.GetProductCatalogPromptAsync();
+
+        string currentResponse = "";
+        int iteration = 0;
+        bool approved = false;
+        string feedback = "";
+
+        while (iteration < MaxIterations && !approved)
+        {
+            iteration++;
+
+            // Writer Agent
+            currentResponse = await GenerateWriterResponse(chatService, productCatalog, question, feedback, iteration);
+
+            // Critic Agent
+            var criticResult = await GetCriticFeedback(chatService, productCatalog, question, currentResponse);
+            approved = criticResult.Approved;
+            feedback = criticResult.Feedback;
+        }
+
+        return new AgentResponse
+        {
+            Response = currentResponse,
+            IterationCount = iteration,
+            IsApproved = approved
+        };
+    }
+
+    private async Task<string> GenerateWriterResponse(
+        IChatCompletionService chatService,
+        string productCatalog,
+        string question,
+        string feedback,
+        int iteration)
+    {
+        var systemPrompt = $@"Jestes pomocnym asystentem sklepu PetWorld - sklepu internetowego z produktami dla zwierzat.
+Twoim zadaniem jest pomagac klientom znalezc odpowiednie produkty i udzielac porad.
+
+{productCatalog}
+
+ZASADY:
+1. Odpowiadaj po polsku, przyjazne i profesjonalnie
+2. Rekomenduj produkty z powyzszego katalogu, jesli pasuja do pytania
+3. Podawaj ceny produktow
+4. Jesli pytanie dotyczy produktu ktorego nie mamy, przepros i zaproponuj alternatywe
+5. Udzielaj krotkich, konkretnych odpowiedzi (max 3-4 zdania dla prostych pytan)
+6. Mozesz udzielac porad dotyczacych opieki nad zwierzetami";
+
+        string userPrompt;
+        if (iteration == 1 || string.IsNullOrEmpty(feedback))
+        {
+            userPrompt = $"Pytanie klienta: {question}";
+        }
+        else
+        {
+            userPrompt = $"Pytanie klienta: {question}\n\nPopraw swoja poprzednia odpowiedz biorac pod uwage ten feedback: {feedback}";
+        }
+
+        var history = new ChatHistory();
+        history.AddSystemMessage(systemPrompt);
+        history.AddUserMessage(userPrompt);
+
+        var response = await chatService.GetChatMessageContentAsync(history);
+        return response.Content ?? "Przepraszam, wystapil problem. Prosze sprobowac ponownie.";
+    }
+
+    private async Task<CriticFeedback> GetCriticFeedback(
+        IChatCompletionService chatService,
+        string productCatalog,
+        string question,
+        string response)
+    {
+        var systemPrompt = $@"Jestes krytykiem oceniajacym odpowiedzi asystenta sklepu PetWorld.
+
+{productCatalog}
+
+Ocen odpowiedz wedlug kryteriow:
+1. Czy odpowiedz jest pomocna i odpowiada na pytanie klienta?
+2. Czy rekomendowane produkty istnieja w katalogu i sa odpowiednie?
+3. Czy podane ceny sa prawidlowe?
+4. Czy odpowiedz jest profesjonalna i przyjazna?
+5. Czy odpowiedz nie jest zbyt dluga?
+
+Odpowiedz TYLKO w formacie JSON:
+{{""approved"": true, ""feedback"": """"}}
+lub
+{{""approved"": false, ""feedback"": ""krotki opis co poprawic""}}";
+
+        var userPrompt = $"Pytanie klienta: {question}\n\nOdpowiedz do oceny: {response}";
+
+        var history = new ChatHistory();
+        history.AddSystemMessage(systemPrompt);
+        history.AddUserMessage(userPrompt);
+
+        var result = await chatService.GetChatMessageContentAsync(history);
+        var content = result.Content ?? "{\"approved\": true, \"feedback\": \"\"}";
+
+        try
+        {
+            content = ExtractJson(content);
+            var feedbackResult = JsonSerializer.Deserialize<CriticFeedback>(content, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+            return feedbackResult ?? new CriticFeedback { Approved = true, Feedback = "" };
+        }
+        catch
+        {
+            return new CriticFeedback { Approved = true, Feedback = "" };
+        }
+    }
+
+    private string ExtractJson(string content)
+    {
+        var start = content.IndexOf('{');
+        var end = content.LastIndexOf('}');
+        if (start >= 0 && end > start)
+        {
+            return content.Substring(start, end - start + 1);
+        }
+        return content;
+    }
+}

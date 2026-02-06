@@ -1,0 +1,80 @@
+﻿@page "/history"
+@using PetWorld.Application.Services
+@using PetWorld.Domain.Entities
+@inject ChatService ChatService
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Historia rozmow</h4>
+                <button class="btn btn-light btn-sm" @onclick="LoadHistory">Odswiez</button>
+            </div>
+            <div class="card-body">
+                @if (isLoading)
+                {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary"></div>
+                        <p class="mt-2">Ladowanie historii...</p>
+                    </div>
+                }
+                else if (conversations == null || !conversations.Any())
+                {
+                    <div class="alert alert-info">
+                        Brak historii rozmow. Rozpocznij rozmowe na stronie <a href="/">Chat</a>.
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th style="width: 150px;">Data</th>
+                                    <th style="width: 30%;">Pytanie</th>
+                                    <th>Odpowiedz</th>
+                                    <th style="width: 100px;" class="text-center">Iteracje</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var conv in conversations)
+                                {
+                                    <tr>
+                                        <td><small>@conv.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small></td>
+                                        <td><div style="max-height: 100px; overflow-y: auto;">@conv.Question</div></td>
+                                        <td><div style="max-height: 150px; overflow-y: auto; white-space: pre-wrap;">@conv.Answer</div></td>
+                                        <td class="text-center"><span class="badge bg-info">@conv.IterationCount</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-muted"><small>Lacznie: @conversations.Count() rozmow</small></div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private IEnumerable<ChatConversation>? conversations;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadHistory();
+    }
+
+    private async Task LoadHistory()
+    {
+        isLoading = true;
+        try
+        {
+            conversations = await ChatService.GetHistoryAsync();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}
