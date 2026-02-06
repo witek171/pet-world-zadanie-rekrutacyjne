@@ -7,15 +7,13 @@ namespace PetWorld.Infrastructure.Repositories;
 
 public class ProductRepository : IProductRepository
 {
-    private readonly PetWorldDbContext _context;
+	private readonly PetWorldDbContext _context;
 
-    public ProductRepository(PetWorldDbContext context)
-    {
-        _context = context;
-    }
+	public ProductRepository(PetWorldDbContext context)
+	{
+		_context = context;
+	}
 
-    public async Task<IEnumerable<Product>> GetAllProductsAsync()
-    {
-        return await _context.Products.ToListAsync();
-    }
+	public async Task<IEnumerable<Product>> GetAllProductsAsync()
+		=> await _context.Products.ToListAsync();
 }

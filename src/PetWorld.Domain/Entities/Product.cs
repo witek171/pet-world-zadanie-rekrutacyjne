@@ -2,9 +2,17 @@
 
 public class Product
 {
-    public int Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string Category { get; set; } = string.Empty;
-    public decimal Price { get; set; }
-    public string Description { get; set; } = string.Empty;
+	public Product(string name, string category, decimal price, string description)
+	{
+		Name = name;
+		Category = category;
+		Price = price;
+		Description = description;
+	}
+
+	public Guid Id { get; } = Guid.NewGuid();
+	public string Name { get; }
+	public string Category { get; }
+	public decimal Price { get; }
+	public string Description { get; }
 }

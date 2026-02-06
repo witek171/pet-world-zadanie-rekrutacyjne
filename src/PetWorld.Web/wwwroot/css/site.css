@@ -1,32 +1,32 @@
 ﻿body {
-    background-color: #f8f9fa;
+  background-color: #f8f9fa;
 }
 
 .card {
-    border-radius: 10px;
+  border-radius: 10px;
 }
 
 .card-header {
-    border-radius: 10px 10px 0 0 !important;
+  border-radius: 10px 10px 0 0 !important;
 }
 
 .navbar-brand {
-    font-weight: bold;
-    font-size: 1.5rem;
+  font-weight: bold;
+  font-size: 1.5rem;
 }
 
 .nav-link {
-    margin-left: 1rem;
+  margin-left: 1rem;
 }
 
 .table td {
-    vertical-align: middle;
+  vertical-align: middle;
 }
 
 a {
-    text-decoration: none;
+  text-decoration: none;
 }
 
 a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }

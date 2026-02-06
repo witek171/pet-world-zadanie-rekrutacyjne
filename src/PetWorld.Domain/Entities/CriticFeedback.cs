@@ -2,6 +2,12 @@
 
 public class CriticFeedback
 {
-    public bool Approved { get; set; }
-    public string Feedback { get; set; } = string.Empty;
+	public CriticFeedback(bool approved, string feedback)
+	{
+		Approved = approved;
+		Feedback = feedback;
+	}
+
+	public bool Approved { get; }
+	public string Feedback { get; }
 }

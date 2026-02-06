@@ -1,0 +1,23 @@
+root = true
+
+# C#
+[*.cs]
+indent_style = tab
+tab_width = 4
+
+# Razor / CSHTML
+[*.{cshtml,razor}]
+indent_style = tab
+tab_width = 4
+
+# YAML
+[*.{yml,yaml}]
+indent_size = 2
+
+# JSON
+[*.json]
+indent_size = 2
+
+# CSS
+[*.css]
+indent_size = 2

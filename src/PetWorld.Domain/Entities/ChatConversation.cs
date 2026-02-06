@@ -2,9 +2,17 @@
 
 public class ChatConversation
 {
-    public int Id { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public string Question { get; set; } = string.Empty;
-    public string Answer { get; set; } = string.Empty;
-    public int IterationCount { get; set; }
+	public ChatConversation(DateTime createdAt, string question, string answer, int iterationCount)
+	{
+		CreatedAt = createdAt;
+		Question = question;
+		Answer = answer;
+		IterationCount = iterationCount;
+	}
+
+	public Guid Id { get; } = Guid.NewGuid();
+	public DateTime CreatedAt { get; }
+	public string Question { get; }
+	public string Answer { get; }
+	public int IterationCount { get; }
 }

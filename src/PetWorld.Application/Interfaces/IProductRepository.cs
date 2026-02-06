@@ -4,5 +4,5 @@ namespace PetWorld.Application.Interfaces;
 
 public interface IProductRepository
 {
-    Task<IEnumerable<Product>> GetAllProductsAsync();
+	Task<IEnumerable<Product>> GetAllProductsAsync();
 }
