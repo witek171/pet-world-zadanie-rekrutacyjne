@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.SemanticKernel;
 using PetWorld.Application.Interfaces;
 using PetWorld.Application.Services;
 using PetWorld.Infrastructure.Agents;
@@ -17,6 +18,17 @@ string connectionString = builder.Configuration.GetConnectionString("DefaultConn
 builder.Services.AddDbContext<PetWorldDbContext>(options =>
 	options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 0))));
 
+builder.Services.AddSingleton<Kernel>(sp =>
+{
+	IConfiguration config = sp.GetRequiredService<IConfiguration>();
+	string apiKey = config["OpenAI:ApiKey"]
+					?? throw new InvalidOperationException("OpenAI:ApiKey not configured");
+	string modelId = config["OpenAI:ModelId"] ?? "gpt-4o-mini";
+
+	return Kernel.CreateBuilder()
+		.AddOpenAIChatCompletion(modelId, apiKey)
+		.Build();
+});
 builder.Services.AddScoped<ChatService>();
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();

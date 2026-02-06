@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Microsoft.Extensions.Configuration;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using PetWorld.Application.Interfaces;
@@ -10,27 +9,18 @@ namespace PetWorld.Infrastructure.Agents;
 public class WriterCriticAgentService : IAgentService
 {
 	private const int MaxIterations = 3;
-	private readonly IConfiguration _configuration;
+	private readonly Kernel _kernel;
 	private readonly IProductService _productService;
 
-	public WriterCriticAgentService(IProductService productService, IConfiguration configuration)
+	public WriterCriticAgentService(Kernel kernel, IProductService productService)
 	{
+		_kernel = kernel;
 		_productService = productService;
-		_configuration = configuration;
 	}
 
 	public async Task<AgentResponse> ProcessQuestionAsync(string question)
 	{
-		string apiKey = _configuration["OpenAI:ApiKey"]
-						?? throw new InvalidOperationException("OpenAI API key not configured in appsettings.json");
-
-		string modelId = _configuration["OpenAI:ModelId"] ?? "gpt-4o-mini";
-
-		IKernelBuilder builder = Kernel.CreateBuilder();
-		builder.AddOpenAIChatCompletion(modelId, apiKey);
-		Kernel kernel = builder.Build();
-
-		IChatCompletionService chatService = kernel.GetRequiredService<IChatCompletionService>();
+		IChatCompletionService chatService = _kernel.GetRequiredService<IChatCompletionService>();
 		string productCatalog = await _productService.GetProductCatalogPromptAsync();
 
 		string currentResponse = "";
